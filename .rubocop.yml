@@ -1,0 +1,33 @@
+AllCops:
+  Exclude:
+    - "vendor/**/*"
+    - "node_modules/**/*"
+    - "test/scratch/**/*"
+  TargetRubyVersion: 2.6
+
+require:
+  - rubocop-performance
+
+Security:
+  Enabled: true
+
+Performance:
+  Enabled: true
+
+Layout:
+  Enabled: false
+
+Metrics:
+  Enabled: false
+
+Style:
+  Enabled: false
+
+Naming/MemoizedInstanceVariableName:
+  Enabled: false
+
+Lint/AmbiguousBlockAssociation:
+  Enabled: false
+
+Bundler/OrderedGems:
+  Enabled: false

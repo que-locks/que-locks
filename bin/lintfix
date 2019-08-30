@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -x
+bundle exec rufo lib test
+bundle exec rubocop -a
