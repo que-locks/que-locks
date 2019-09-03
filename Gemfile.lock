@@ -1,18 +1,43 @@
+GIT
+  remote: https://github.com/chanks/que
+  revision: 5ddddd5ebac6153d7a683ef08c86bced8e03fb51
+  specs:
+    que (1.0.0.beta3)
+
 PATH
   remote: .
   specs:
     que-locks (0.1.0)
-      que
+      neatjson
+      que (>= 0.10)
+      xxhash
 
 GEM
   remote: https://rubygems.org/
   specs:
+    activemodel (6.0.0)
+      activesupport (= 6.0.0)
+    activerecord (6.0.0)
+      activemodel (= 6.0.0)
+      activesupport (= 6.0.0)
+    activesupport (6.0.0)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      i18n (>= 0.7, < 2)
+      minitest (~> 5.1)
+      tzinfo (~> 1.1)
+      zeitwerk (~> 2.1, >= 2.1.8)
     ast (2.4.0)
+    byebug (11.0.1)
+    concurrent-ruby (1.1.5)
+    i18n (1.6.0)
+      concurrent-ruby (~> 1.0)
     jaro_winkler (1.5.3)
+    minitest (5.11.3)
+    neatjson (0.9)
     parallel (1.17.0)
     parser (2.6.3.0)
       ast (~> 2.4.0)
-    que (0.14.3)
+    pg (1.1.4)
     rainbow (3.0.0)
     rake (10.5.0)
     rubocop (0.74.0)
@@ -26,13 +51,23 @@ GEM
       rubocop (>= 0.71.0)
     ruby-progressbar (1.10.1)
     rufo (0.7.0)
+    thread_safe (0.3.6)
+    tzinfo (1.2.5)
+      thread_safe (~> 0.1)
     unicode-display_width (1.6.0)
+    xxhash (0.4.0)
+    zeitwerk (2.1.9)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  activerecord
   bundler (~> 1.17)
+  byebug
+  minitest
+  pg
+  que (= 1.0.0.beta3)!
   que-locks!
   rake (~> 10.0)
   rubocop
