@@ -15,10 +15,23 @@ module Que
 
   module Locks::ExecutionLock
     class << self
-      def lock_available?(args)
+      def already_enqueued_job_wanting_lock?(args)
         args_string = Que.serialize_json(args)
         values = Que.execute(:args_already_enqueued, [args_string]).first
-        values[:count] == 0
+        values[:count] != 0
+      end
+
+      def can_aquire?(args)
+        key = lock_key(args)
+        result = false
+        begin
+          result = aquire!(key)
+        ensure
+          if result
+            release!(key)
+          end
+        end
+        result
       end
 
       def lock_key(args)
@@ -32,18 +45,6 @@ module Que
 
       def release!(key)
         Que.execute(:release_execution_lock, [key])
-      end
-
-      def can_aquire?(key)
-        result = false
-        begin
-          result = aquire!(key)
-        ensure
-          if result
-            release!(key)
-          end
-        end
-        result
       end
     end
   end
