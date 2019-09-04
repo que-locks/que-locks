@@ -1,7 +1,7 @@
 require "xxhash"
 
 module Que
-  SQL[:check_job_execution_lock] = %{
+  SQL[:args_already_enqueued] = %{
     SELECT COUNT(*) FROM public.que_jobs WHERE args = $1 and finished_at IS NULL AND expired_at IS NULL;
   }
 
@@ -17,7 +17,7 @@ module Que
     class << self
       def lock_available?(args)
         args_string = Que.serialize_json(args)
-        values = Que.execute(:check_job_execution_lock, [args_string]).first
+        values = Que.execute(:args_already_enqueued, [args_string]).first
         values[:count] == 0
       end
 
@@ -32,6 +32,18 @@ module Que
 
       def release!(key)
         Que.execute(:release_execution_lock, [key])
+      end
+
+      def can_aquire?(key)
+        result = false
+        begin
+          result = aquire!(key)
+        ensure
+          if result
+            release!(key)
+          end
+        end
+        result
       end
     end
   end

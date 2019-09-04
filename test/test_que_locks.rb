@@ -37,6 +37,10 @@ class TestQueLocks < Minitest::Test
     assert_equal [1], $executions
   end
 
+  def test_can_aquire_lock
+    assert Que::Locks::ExecutionLock.can_aquire?(123)
+  end
+
   def with_synchronous_execution
     old = Que.run_synchronously
     Que.run_synchronously = true
