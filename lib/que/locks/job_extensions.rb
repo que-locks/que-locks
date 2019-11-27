@@ -2,7 +2,7 @@ module Que::Locks
   module JobExtensions
     attr_accessor :exclusive_execution_lock
 
-    def lock_available?(*args, queue: nil, priority: nil, run_at: nil, job_class: nil, tags: nil, **arg_opts)
+    def lock_available?(*args, queue: nil, priority: nil, run_at: nil, job_class: nil, tags: nil, **arg_opts) # rubocop:disable Lint/UnusedMethodArgument
       args << arg_opts if arg_opts.any?
       return true unless self.exclusive_execution_lock
       return false if Que::Locks::ExecutionLock.already_enqueued_job_wanting_lock?(args)

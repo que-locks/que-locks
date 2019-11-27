@@ -3,7 +3,7 @@ name: Ruby
 on: [push]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     strategy:
@@ -21,7 +21,9 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: "postgres://postgres:postgres@localhost/que_locks"
+      DATABASE_URL: "postgres://postgres@localhost/que_locks"
+      PGHOST: 127.0.0.1
+      PGUSER: postgres
 
     steps:
       - uses: actions/checkout@v1
@@ -29,14 +31,37 @@ jobs:
         uses: actions/setup-ruby@v1
         with:
           ruby-version: 2.6.x
-
       - name: Install system dependencies
         run: |
-        sudo apt-get -yqq install libpq-dev postgresql-client
-        createdb que_locks
-
+          sudo apt-get -yqq install libpq-dev postgresql-client
+          createdb que_locks
       - name: Build and test with Rake
         run: |
           gem install bundler
           bundle install --jobs 4 --retry 3
           bundle exec rake
+  lint:
+    runs-on: ubuntu-latest
+
+    env:
+      PGHOST: 127.0.0.1
+      PGUSER: postgres
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Ruby 2.6
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+      - name: Install system dependencies
+        run: |
+          sudo apt-get -yqq install libpq-dev postgresql-client
+      - name: Bundle
+        run: |
+          gem install bundler
+          bundle install --jobs 4 --retry 3
+      - name: Rubocop checks
+        uses: gimenete/rubocop-action@1.0
+      - name: Check code formatting with rufo
+        run: |
+          bundle exec rufo --check lib test

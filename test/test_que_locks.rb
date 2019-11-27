@@ -58,7 +58,7 @@ class TestQueLocks < Minitest::Test
     assert_equal [1], $executions
   end
 
-  def test_execution_of_locked_job_with_reenqueue_during_execution
+  def test_multiple_execution_of_locked_job_with_reenqueue_during_execution
     TestReenqueueJob.enqueue(1)
     TestReenqueueJob.enqueue(2)
     TestReenqueueJob.enqueue(3)

@@ -33,7 +33,7 @@ class TestExecutionLock < Minitest::Test
     try_aquire, done_trying = Queue.new, Queue.new
     t =
       Thread.new do
-        Que.pool.checkout do |conn|
+        Que.pool.checkout do |_conn|
           try_aquire.pop
           refute Que::Locks::ExecutionLock.can_aquire_key?(123)
           refute Que::Locks::ExecutionLock.aquire!(123)
@@ -48,7 +48,7 @@ class TestExecutionLock < Minitest::Test
         end
       end
 
-    Que.pool.checkout do |conn|
+    Que.pool.checkout do |_conn|
       # Acquire the lock in this outer thread
       assert Que::Locks::ExecutionLock.can_aquire_key?(123)
       assert Que::Locks::ExecutionLock.aquire!(123)
@@ -76,7 +76,7 @@ class TestExecutionLock < Minitest::Test
     try_aquire, done_trying = Queue.new, Queue.new
     t =
       Thread.new do
-        Que.pool.checkout do |conn|
+        Que.pool.checkout do |_conn|
           try_aquire.pop
           refute Que::Locks::ExecutionLock.can_aquire_key?(123)
           try_aquire.pop
@@ -85,7 +85,7 @@ class TestExecutionLock < Minitest::Test
         end
       end
 
-    Que.pool.checkout do |conn|
+    Que.pool.checkout do |_conn|
       # Acquire the lock in this outer thread, then tell the inner thread to check if it can be acquired.
       assert Que::Locks::ExecutionLock.aquire!(123)
       try_aquire.push(nil)

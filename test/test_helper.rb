@@ -35,7 +35,7 @@ class Minitest::Test
   def sleep_until?(timeout: SLEEP_UNTIL_TIMEOUT)
     deadline = Time.now + timeout
     loop do
-      if result = yield
+      if (result = yield)
         return result
       end
 
@@ -50,7 +50,6 @@ class Minitest::Test
   def run_jobs
     job_buffer = Que::JobBuffer.new(maximum_size: 20, minimum_size: 0, priorities: [10, 30, 50, nil])
     result_queue = Que::ResultQueue.new
-    worker = Que::Worker.new(job_buffer: job_buffer, result_queue: result_queue)
 
     jobs = ActiveRecord::Base.connection.execute("SELECT * FROM que_jobs;").to_a.map do |job|
       job.symbolize_keys!
@@ -62,6 +61,7 @@ class Minitest::Test
     jobs.map! { |job| Que::Metajob.new(job) }
     job_ids = jobs.map(&:id).sort
     job_buffer.push(*jobs)
+    Que::Worker.new(job_buffer: job_buffer, result_queue: result_queue)
 
     sleep_until timeout: 10 do
       finished_job_ids(result_queue) == job_ids
