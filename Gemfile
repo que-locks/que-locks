@@ -10,6 +10,7 @@ gemspec
 group :development do
   gem 'activerecord'
   gem 'pg'
+  gem 'database_cleaner'
 
   gem 'minitest'
 

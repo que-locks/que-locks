@@ -29,6 +29,7 @@ GEM
     ast (2.4.0)
     byebug (11.0.1)
     concurrent-ruby (1.1.5)
+    database_cleaner (1.7.0)
     i18n (1.6.0)
       concurrent-ruby (~> 1.0)
     jaro_winkler (1.5.3)
@@ -65,6 +66,7 @@ DEPENDENCIES
   activerecord
   bundler (~> 1.17)
   byebug
+  database_cleaner
   minitest
   pg
   que (= 1.0.0.beta3)!

@@ -15,7 +15,7 @@ module Que::Locks
         args_list << arg_opts if arg_opts.any?
 
         if Que::Locks::ExecutionLock.already_enqueued_job_wanting_lock?(args_list)
-          Que.log(level: :info, event: :skipped_enqueue_due_to_preemtive_lock_check, args: args_list)
+          Que.log(level: :info, event: :skipped_enqueue_due_to_preemptive_lock_check, args: args_list)
         else
           super
         end

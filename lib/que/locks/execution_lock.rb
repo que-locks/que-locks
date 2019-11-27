@@ -22,7 +22,10 @@ module Que
       end
 
       def can_aquire?(args)
-        key = lock_key(args)
+        can_aquire_key?(lock_key(args))
+      end
+
+      def can_aquire_key?(key)
         result = false
         begin
           result = aquire!(key)
