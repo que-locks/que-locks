@@ -60,8 +60,9 @@ jobs:
         run: |
           gem install bundler
           bundle install --jobs 4 --retry 3
-      - name: Rubocop checks
-        uses: gimenete/rubocop-action@1.0
+      - name: Check code with rubocop
+        run: |
+          bundle exec rubocop
       - name: Check code formatting with rufo
         run: |
           bundle exec rufo --check lib test
