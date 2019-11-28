@@ -30,13 +30,25 @@ After requiring the gem, set the `exclusive_execution_lock` property on your job
 class SomeJob < Que::Job
   self.exclusive_execution_lock = true
 
-  def run(foo:, bar:)
+  def run(user_id:, bar:)
     # useful stuff
   end
 end
 ```
 
 That's it!
+
+#### Checking lock status
+
+Occasionally, code enqueuing a job might want to check if the job is already running and do something different if it is, like display a message to the user or log the skipped execution. `que-locks` supports some basic job lock introspection like so:
+
+```ruby
+SomeJobClass.exclusive_execution_lock  #=> returns true if the job is indeed using que-locks
+
+SomeJobClass.lock_available?(user_id: 1)  #=> returns true if no job is currently enqueued with these arguments or running right now holding the lock
+```
+
+Note that checking the lock's availability reports on the current state of the locks, but that state might change in between when the check is made and if/when the job is enqueued with the same arguments. Put differently, the `#lock_available?` method is advisory to user code, and doesn't actaully reserve the lock or execute a compare-and-swap operation. It's safe for multiple processes to race to enqueue a job after checking to see that the lock is available, as only one will still be executed, but they may both report that the lock was available before enqueuing.
 
 ## Semantics
 
@@ -81,3 +93,7 @@ The gem is available as open source under the terms of the [MIT License](https:/
 ## Code of Conduct
 
 Everyone interacting in the Que::Locks project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/hornairs/que-locks/blob/master/CODE_OF_CONDUCT.md).
+
+```
+
+```

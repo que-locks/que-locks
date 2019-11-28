@@ -2,7 +2,7 @@ require "xxhash"
 
 module Que
   SQL[:args_already_enqueued] = %{
-    SELECT COUNT(*) FROM public.que_jobs WHERE args = $1 and finished_at IS NULL AND expired_at IS NULL;
+    SELECT COUNT(*) FROM public.que_jobs WHERE job_class = $1 AND args = $2 AND finished_at IS NULL AND expired_at IS NULL;
   }
 
   SQL[:try_aquire_execution_lock] = %{
@@ -15,14 +15,14 @@ module Que
 
   module Locks::ExecutionLock
     class << self
-      def already_enqueued_job_wanting_lock?(args)
+      def already_enqueued_job_wanting_lock?(klass, args)
         args_string = Que.serialize_json(args)
-        values = Que.execute(:args_already_enqueued, [args_string]).first
+        values = Que.execute(:args_already_enqueued, [klass.name, args_string]).first
         values[:count] != 0
       end
 
-      def can_aquire?(args)
-        can_aquire_key?(lock_key(args))
+      def can_aquire?(klass, args)
+        can_aquire_key?(lock_key(klass, args))
       end
 
       def can_aquire_key?(key)
@@ -37,8 +37,8 @@ module Que
         result
       end
 
-      def lock_key(args)
-        XXhash.xxh32(Que.serialize_json(args), 42) / 2
+      def lock_key(klass, args)
+        XXhash.xxh32(klass.name + ":" + Que.serialize_json(args), 42) / 2
       end
 
       def aquire!(key)
