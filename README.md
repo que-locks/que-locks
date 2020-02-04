@@ -69,6 +69,7 @@ In some instances, multiple jobs with the same arguments can be enqueued and sit
 - Configurable preemptive lock checking at enqueue time
 - Selective argument comparison for lock key computation
 - maybe a `que-web` integration to expose lock info
+- ActiveJob integration for Rails users. It'd be nice for those who prefer the ActiveJob::Job API to use `que-locks` for nice transactional locking semantics, but this doesn't exist yet. In the meantime, we suggest using `Que::Job` directly.
 
 If you wish for any of this stuff, feel free to open a PR, contributions are always welcome!!
 
@@ -84,7 +85,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/hornairs/que-locks. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/airhorns/que-locks. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
 
