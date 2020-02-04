@@ -1,0 +1,17 @@
+version: "3.6"
+
+volumes:
+  postgres-data:
+    driver: local
+
+services:
+  postgres:
+    image: postgres:11.2
+    volumes:
+      - postgres-data:/var/lib/postgresql/data:delegated
+    ports:
+      - 5432:5432
+    restart: on-failure
+    environment:
+      POSTGRES_USER: que_locks
+      POSTGRES_DB: que_locks_test

@@ -5,7 +5,9 @@ require "byebug"
 require "active_record"
 require "database_cleaner"
 
-ActiveRecord::Base.establish_connection(ENV.fetch("DATABASE_URL", "postgres://localhost/que-test"))
+# use docker-compose'd postgres by default
+ActiveRecord::Base.establish_connection(ENV.fetch("DATABASE_URL", "postgres://que_locks@localhost/que_locks_test"))
+
 Que.connection = ActiveRecord
 Que::Migrations.migrate!(version: Que::Migrations::CURRENT_VERSION)
 
