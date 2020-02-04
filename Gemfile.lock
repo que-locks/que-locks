@@ -1,6 +1,7 @@
 GIT
-  remote: https://github.com/chanks/que
+  remote: https://github.com/que-rb/que
   revision: 53106609b24d7e8bc231ae3883f69dca8c989d9d
+  ref: 53106609b24d7e8bc231ae3883f69dca8c989d9d
   specs:
     que (1.0.0.beta3)
 
@@ -15,56 +16,62 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activemodel (6.0.1)
-      activesupport (= 6.0.1)
-    activerecord (6.0.1)
-      activemodel (= 6.0.1)
-      activesupport (= 6.0.1)
-    activesupport (6.0.1)
+    activejob (6.0.2.1)
+      activesupport (= 6.0.2.1)
+      globalid (>= 0.3.6)
+    activemodel (6.0.2.1)
+      activesupport (= 6.0.2.1)
+    activerecord (6.0.2.1)
+      activemodel (= 6.0.2.1)
+      activesupport (= 6.0.2.1)
+    activesupport (6.0.2.1)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 0.7, < 2)
       minitest (~> 5.1)
       tzinfo (~> 1.1)
       zeitwerk (~> 2.2)
     ast (2.4.0)
-    byebug (11.0.1)
+    byebug (11.1.1)
     concurrent-ruby (1.1.5)
-    database_cleaner (1.7.0)
-    i18n (1.7.0)
+    database_cleaner (1.8.2)
+    globalid (0.4.2)
+      activesupport (>= 4.2.0)
+    i18n (1.8.2)
       concurrent-ruby (~> 1.0)
     jaro_winkler (1.5.4)
-    minitest (5.13.0)
+    minitest (5.14.0)
     neatjson (0.9)
     parallel (1.19.1)
-    parser (2.6.5.0)
+    parser (2.7.0.2)
       ast (~> 2.4.0)
-    pg (1.1.4)
+    pg (1.2.2)
     rainbow (3.0.0)
     rake (10.5.0)
-    rubocop (0.76.0)
+    rubocop (0.79.0)
       jaro_winkler (~> 1.5.1)
       parallel (~> 1.10)
-      parser (>= 2.6)
+      parser (>= 2.7.0.1)
       rainbow (>= 2.2.2, < 4.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 1.4.0, < 1.7)
-    rubocop-performance (1.5.1)
+    rubocop-performance (1.5.2)
       rubocop (>= 0.71.0)
     ruby-progressbar (1.10.1)
-    rufo (0.7.0)
+    rufo (0.10.0)
     thread_safe (0.3.6)
-    tzinfo (1.2.5)
+    tzinfo (1.2.6)
       thread_safe (~> 0.1)
-    unicode-display_width (1.6.0)
+    unicode-display_width (1.6.1)
     xxhash (0.4.0)
-    zeitwerk (2.2.1)
+    zeitwerk (2.2.2)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  activejob
   activerecord
-  bundler (~> 1.17)
+  bundler
   byebug
   database_cleaner
   minitest
@@ -77,4 +84,4 @@ DEPENDENCIES
   rufo
 
 BUNDLED WITH
-   1.17.2
+   2.1.4
