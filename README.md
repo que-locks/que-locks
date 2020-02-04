@@ -22,6 +22,8 @@ Or install it yourself as:
 
     $ gem install que-locks
 
+**Note**: `que-locks` is built for Que 1.0, which is at this time not the default version of que you'll get if you don't specify a prelease que version like `1.0.0.beta3` in your application's Gemfile.
+
 ## Usage
 
 After requiring the gem, set the `exclusive_execution_lock` property on your job class:
@@ -43,9 +45,9 @@ That's it!
 Occasionally, code enqueuing a job might want to check if the job is already running and do something different if it is, like display a message to the user or log the skipped execution. `que-locks` supports some basic job lock introspection like so:
 
 ```ruby
-SomeJobClass.exclusive_execution_lock  #=> returns true if the job is indeed using que-locks
+SomeJob.exclusive_execution_lock  #=> returns true if the job is indeed using que-locks
 
-SomeJobClass.lock_available?(user_id: 1)  #=> returns true if no job is currently enqueued with these arguments or running right now holding the lock
+SomeJob.lock_available?(user_id: 1)  #=> returns true if no job is currently enqueued with these arguments or running right now holding the lock
 ```
 
 Note that checking the lock's availability reports on the current state of the locks, but that state might change in between when the check is made and if/when the job is enqueued with the same arguments. Put differently, the `#lock_available?` method is advisory to user code, and doesn't actaully reserve the lock or execute a compare-and-swap operation. It's safe for multiple processes to race to enqueue a job after checking to see that the lock is available, as only one will still be executed, but they may both report that the lock was available before enqueuing.
@@ -75,7 +77,7 @@ If you wish for any of this stuff, feel free to open a PR, contributions are alw
 
 ## Non features
 
-- Locking to a limited concurrency greater than 1. If you want a lock that several different jobs can take out, a good option is to use Que's multiple queue support and run a limited number of workers working a certain queue so the concurrency is limited by the available worker slots.
+- Locking to a limited concurrency greater than 1. Also called semaphore tickets. If you want a lock that several different jobs can take out, a good option is to use Que's multiple queue support and run a limited number of workers working a certain queue so the concurrency is limited by the available worker slots. This is absent because it adds a lot of complexity to the locking code as Postgres doesn't natively support these cross-session, stacking advisory locks.
 
 ## Development
 
@@ -94,7 +96,3 @@ The gem is available as open source under the terms of the [MIT License](https:/
 ## Code of Conduct
 
 Everyone interacting in the Que::Locks project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/hornairs/que-locks/blob/master/CODE_OF_CONDUCT.md).
-
-```
-
-```
