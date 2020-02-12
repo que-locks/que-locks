@@ -1,4 +1,4 @@
-# Que::Locks
+# Que::Locks ![Ruby](https://github.com/airhorns/que-locks/workflows/Ruby/badge.svg)
 
 `que-locks` adds an opt-in exclusive execution lock to [Que](https://github.com/que-rb/que), a robust and simple Postgres based background job library. Jobs can specify that exactly one instance of a job should be executing at once and `que-locks` will prevent the enqueuing and execution of any other instance of the same job with the same arguments. This is useful for jobs that are doing something important that should only ever happen one at a time, like processing a payment for a given user, or super expensive jobs that could cause thundering herd problems if enqueued all at the same time.
 
