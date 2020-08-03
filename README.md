@@ -44,6 +44,10 @@ end
 
 That's it!
 
+## Configuration (Important!)
+
+Right now, `que-locks` does __not__ support Que running with a `--worker-count` greater than 1! This is because the locking strategy is not compatible with the way Que uses it's connection pool. This is a big limitation we hope to remove, but please note that you must run Que with one worker per process when using `que-locks`. 
+
 ### Checking lock status
 
 Occasionally, code enqueuing a job might want to check if the job is already running and do something different if it is, like display a message to the user or log the skipped execution. `que-locks` supports some basic job lock introspection like so:
