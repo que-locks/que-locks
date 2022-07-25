@@ -1,4 +1,5 @@
 require "minitest/autorun"
+require "mocha/minitest"
 require "que"
 require "que/locks"
 require "byebug"
@@ -11,8 +12,8 @@ ActiveRecord::Base.establish_connection(ENV.fetch("DATABASE_URL", "postgres://qu
 Que.connection = ActiveRecord
 Que::Migrations.migrate!(version: Que::Migrations::CURRENT_VERSION)
 
-Que.logger = Logger.new(STDOUT)
-Que.internal_logger = Logger.new(STDOUT)
+Que.logger = Logger.new(STDOUT, level: Logger::WARN)
+Que.internal_logger = Logger.new(STDOUT, level: Logger::WARN)
 DatabaseCleaner.strategy = :truncation
 
 class Minitest::Test
@@ -50,7 +51,7 @@ class Minitest::Test
   end
 
   def run_jobs
-    job_buffer = Que::JobBuffer.new(maximum_size: 20, minimum_size: 0, priorities: [10, 30, 50, nil])
+    job_buffer = Que::JobBuffer.new(maximum_size: 20, priorities: [10, 30, 50, nil])
     result_queue = Que::ResultQueue.new
 
     jobs = ActiveRecord::Base.connection.execute("SELECT * FROM que_jobs;").to_a.map do |job|
