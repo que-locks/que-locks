@@ -3,16 +3,18 @@ require_relative "test_helper"
 $executions = []
 
 class TestUntouchedJob < Que::Job
-  def run(user_id)
-    $executions << user_id
+  def run(user_id, **kwargs)
+    args = kwargs.empty? ? user_id : [user_id] << kwargs
+    $executions << args
   end
 end
 
 class TestJob < Que::Job
   self.exclusive_execution_lock = true
 
-  def run(user_id)
-    $executions << user_id
+  def run(user_id, **kwargs)
+    args = kwargs.empty? ? user_id : [user_id] << kwargs
+    $executions << args
   end
 end
 
@@ -38,6 +40,14 @@ class TestQueLocks < Minitest::Test
     assert_equal [1], $executions
   end
 
+  def test_multiple_enqueued_untouched_jobs
+    TestUntouchedJob.enqueue(1)
+    TestUntouchedJob.enqueue(1)
+    run_jobs
+
+    assert_equal [1, 1], $executions
+  end
+
   def test_sync_execution_of_locked_job
     with_synchronous_execution do
       TestJob.enqueue(1)
@@ -49,7 +59,16 @@ class TestQueLocks < Minitest::Test
   def test_execution_of_locked_job
     TestJob.enqueue(1)
     run_jobs
+
     assert_equal [1], $executions
+  end
+
+  def test_multiple_enqueued_locked_jobs
+    TestJob.enqueue(1)
+    TestJob.enqueue(1)
+    run_jobs
+
+    assert_equal [1], $executions # one should be deduped
   end
 
   def test_execution_of_locked_job_with_reenqueue_during_execution
@@ -64,5 +83,169 @@ class TestQueLocks < Minitest::Test
     TestReenqueueJob.enqueue(3)
     run_jobs
     assert_equal [1, 2, 3].sort, $executions.sort
+  end
+
+  def test_can_enqueue_untouched_job_with_deprecated_api_including_run_at
+    Que::Locks::ExecutionLock.expects(:already_enqueued_job_wanting_lock?).never
+
+    run_at = Time.now
+    job = nil
+    _, stderr = capture_subprocess_io do
+      job = TestUntouchedJob.enqueue(1, queue: :foo, priority: 10, run_at: run_at, job_class: :bar, tags: [:baz], unrelated: :qux)
+    end
+
+    assert_equal :foo, job.que_attrs[:queue].to_sym
+    assert_equal 10, job.que_attrs[:priority]
+    assert_equal run_at.to_i, job.que_attrs[:run_at].to_i
+    assert_equal :bar, job.que_attrs[:job_class].to_sym
+    assert_equal({ tags: ["baz"] }, job.que_attrs[:data])
+
+    # Refute any deprecation notice, since we rewrote the options
+    refute_includes stderr, "Please wrap job options in an explicit"
+  end
+
+  def test_can_enqueue_untouched_job_with_deprecated_api
+    Que::Locks::ExecutionLock.expects(:already_enqueued_job_wanting_lock?).never
+
+    with_synchronous_execution do
+      job = nil
+      _, stderr = capture_subprocess_io do
+        job = TestUntouchedJob.enqueue(1, queue: :foo, priority: 10, job_class: :bar, tags: [:baz], unrelated: :qux)
+      end
+      assert_equal :foo, job.que_attrs[:queue].to_sym
+      assert_equal 10, job.que_attrs[:priority]
+      assert_equal :bar, job.que_attrs[:job_class].to_sym
+      assert_equal({ tags: ["baz"] }, job.que_attrs[:data])
+
+      # Refute any deprecation notice, since we rewrote the options
+      refute_includes stderr, "Please wrap job options in an explicit"
+    end
+
+    assert_equal [[1, { unrelated: "qux" }]], $executions
+  end
+
+  def test_can_enqueue_untouched_job_with_v2_api_including_run_at
+    Que::Locks::ExecutionLock.expects(:already_enqueued_job_wanting_lock?).never
+
+    run_at = Time.now
+    job = nil
+    _, stderr = capture_subprocess_io do
+      job = TestUntouchedJob.enqueue(1, unrelated: :qux, job_options: { queue: :foo, priority: 10, run_at: run_at, job_class: :bar, tags: [:baz] })
+    end
+
+    assert_equal :foo, job.que_attrs[:queue].to_sym
+    assert_equal 10, job.que_attrs[:priority]
+    assert_equal run_at.to_i, job.que_attrs[:run_at].to_i
+    assert_equal :bar, job.que_attrs[:job_class].to_sym
+    assert_equal({ tags: ["baz"] }, job.que_attrs[:data])
+
+    # Assert lack of deprecation notice
+    refute_includes stderr, "Please wrap job options in an explicit"
+  end
+
+  def test_can_enqueue_untouched_job_with_v2_api
+    Que::Locks::ExecutionLock.expects(:already_enqueued_job_wanting_lock?).never
+
+    with_synchronous_execution do
+      job = nil
+      _, stderr = capture_subprocess_io do
+        job = TestUntouchedJob.enqueue(1, unrelated: :qux, job_options: { queue: :foo, priority: 10, job_class: :bar, tags: [:baz] })
+      end
+
+      assert_equal :foo, job.que_attrs[:queue].to_sym
+      assert_equal 10, job.que_attrs[:priority]
+      assert_equal :bar, job.que_attrs[:job_class].to_sym
+      assert_equal({ tags: ["baz"] }, job.que_attrs[:data])
+
+      # Assert lack of deprecation notice
+      refute_includes stderr, "Please wrap job options in an explicit"
+    end
+
+    assert_equal [[1, { unrelated: "qux" }]], $executions
+  end
+
+  def test_can_enqueue_locked_job_with_deprecated_api_including_run_at
+    # Expect the common que options to not be included in the check
+    Que::Locks::ExecutionLock.expects(:already_enqueued_job_wanting_lock?).with(TestJob, [1, unrelated: :qux]).returns(false)
+
+    run_at = Time.now
+    job = nil
+    _, stderr = capture_subprocess_io do
+      job = TestJob.enqueue(1, queue: :foo, priority: 10, run_at: run_at, job_class: :bar, tags: [:baz], unrelated: :qux)
+    end
+
+    assert_equal :foo, job.que_attrs[:queue].to_sym
+    assert_equal 10, job.que_attrs[:priority]
+    assert_equal run_at.to_i, job.que_attrs[:run_at].to_i
+    assert_equal :bar, job.que_attrs[:job_class].to_sym
+    assert_equal({ tags: ["baz"] }, job.que_attrs[:data])
+
+    # Refute any deprecation notice, since we rewrote the options
+    refute_includes stderr, "Please wrap job options in an explicit"
+  end
+
+  def test_can_enqueue_locked_job_with_deprecated_api
+    # Expect the common que options to not be included in the check
+    Que::Locks::ExecutionLock.expects(:already_enqueued_job_wanting_lock?).with(TestJob, [1, unrelated: :qux]).returns(false)
+
+    with_synchronous_execution do
+      job = nil
+      _, stderr = capture_subprocess_io do
+        job = TestJob.enqueue(1, queue: :foo, priority: 10, job_class: :bar, tags: [:baz], unrelated: :qux)
+      end
+      assert_equal :foo, job.que_attrs[:queue].to_sym
+      assert_equal 10, job.que_attrs[:priority]
+      assert_equal :bar, job.que_attrs[:job_class].to_sym
+      assert_equal({ tags: ["baz"] }, job.que_attrs[:data])
+
+      # Refute any deprecation notice, since we rewrote the options
+      refute_includes stderr, "Please wrap job options in an explicit"
+    end
+    assert_equal [[1, { unrelated: "qux" }]], $executions
+  end
+
+  def test_can_enqueue_locked_job_with_v2_api_including_run_at
+    # Expect the common que options to not be included in the check
+    Que::Locks::ExecutionLock.expects(:already_enqueued_job_wanting_lock?).with(TestJob, [1, unrelated: :qux]).returns(false)
+
+    run_at = Time.now
+    job = nil
+    _, stderr = capture_subprocess_io do
+      job = TestJob.enqueue(1, unrelated: :qux, job_options: { queue: :foo, priority: 10, run_at: run_at, job_class: :bar, tags: [:baz] })
+    end
+
+    assert_equal :foo, job.que_attrs[:queue].to_sym
+    assert_equal 10, job.que_attrs[:priority]
+    assert_equal run_at.to_i, job.que_attrs[:run_at].to_i
+    assert_equal :bar, job.que_attrs[:job_class].to_sym
+    assert_equal({ tags: ["baz"] }, job.que_attrs[:data])
+
+    # Assert lack of deprecation notice
+    refute_includes stderr, "Please wrap job options in an explicit"
+  end
+
+  def test_can_enqueue_locked_job_with_v2_api
+    # Expect the common que options to not be included in the check
+    Que::Locks::ExecutionLock.expects(:already_enqueued_job_wanting_lock?).with(TestJob, [1, unrelated: :qux]).returns(false)
+
+    with_synchronous_execution do
+      job = nil
+      _, stderr = capture_subprocess_io do
+        job = TestJob.enqueue(1, unrelated: :qux, job_options: { queue: :foo, priority: 10, job_class: :bar, tags: [:baz] })
+      end
+      assert_equal :foo, job.que_attrs[:queue].to_sym
+      assert_equal 10, job.que_attrs[:priority]
+      assert_equal :bar, job.que_attrs[:job_class].to_sym
+      assert_equal({ tags: ["baz"] }, job.que_attrs[:data])
+
+      # Assert lack of deprecation notice
+      refute_includes stderr, "Please wrap job options in an explicit"
+    end
+    assert_equal [[1, { unrelated: "qux" }]], $executions
+  end
+
+  def test_job_options_overrides_kwarg
+    job = TestJob.enqueue(1, queue: :foo, job_options: { queue: :bar })
+    assert_equal :bar, job.que_attrs[:queue].to_sym
   end
 end

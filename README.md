@@ -26,8 +26,6 @@ Or install it yourself as:
 $ gem install que-locks
 ```
 
-**Note**: `que-locks` is built for Que 1.0, which is at this time not the default version of que you'll get if you don't specify a prerelease que version like `1.0.0.beta3` in your application's Gemfile.
-
 ## Usage
 
 After requiring the gem, set the `exclusive_execution_lock` property on your job class:
@@ -46,7 +44,7 @@ That's it!
 
 ## Configuration (Important!)
 
-Right now, `que-locks` does __not__ support Que running with a `--worker-count` greater than 1! This is because the locking strategy is not compatible with the way Que uses it's connection pool. This is a big limitation we hope to remove, but please note that you must run Que with one worker per process when using `que-locks`. 
+Right now, `que-locks` does __not__ support Que running with a `--worker-count` greater than 1! This is because the locking strategy is not compatible with the way Que uses its connection pool. This is a big limitation we hope to remove, but please note that you must run Que with one worker per process when using `que-locks`.
 
 ### Checking lock status
 

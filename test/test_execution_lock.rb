@@ -69,7 +69,11 @@ class TestExecutionLock < Minitest::Test
   end
 
   def test_release_unaquired_lock
-    assert Que::Locks::ExecutionLock.release!(123)
+    _, stderr = capture_subprocess_io do
+      assert Que::Locks::ExecutionLock.release!(123)
+    end
+
+    assert_includes stderr, "you don't own a lock"
   end
 
   def test_checking_lock_after_aquisition_doesnt_release

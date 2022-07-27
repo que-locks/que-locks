@@ -1,16 +1,9 @@
-GIT
-  remote: https://github.com/que-rb/que
-  revision: 53106609b24d7e8bc231ae3883f69dca8c989d9d
-  ref: 53106609b24d7e8bc231ae3883f69dca8c989d9d
-  specs:
-    que (1.0.0.beta3)
-
 PATH
   remote: .
   specs:
     que-locks (0.2.0)
       neatjson
-      que (~> 1.0.0.beta3)
+      que (~> 1.0)
       xxhash
 
 GEM
@@ -40,11 +33,13 @@ GEM
       concurrent-ruby (~> 1.0)
     jaro_winkler (1.5.4)
     minitest (5.14.0)
+    mocha (1.14.0)
     neatjson (0.9)
     parallel (1.19.1)
     parser (2.7.0.2)
       ast (~> 2.4.0)
     pg (1.2.2)
+    que (1.4.1)
     rainbow (3.0.0)
     rake (10.5.0)
     rubocop (0.79.0)
@@ -75,8 +70,8 @@ DEPENDENCIES
   byebug
   database_cleaner
   minitest
+  mocha
   pg
-  que (= 1.0.0.beta3)!
   que-locks!
   rake (~> 10.0)
   rubocop
@@ -84,4 +79,4 @@ DEPENDENCIES
   rufo
 
 BUNDLED WITH
-   2.1.4
+   2.3.18
