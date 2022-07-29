@@ -4,6 +4,8 @@ AllCops:
     - "node_modules/**/*"
     - "test/scratch/**/*"
   TargetRubyVersion: 2.6
+  NewCops: disable
+  SuggestExtensions: false
 
 require:
   - rubocop-performance
@@ -30,4 +32,7 @@ Lint/AmbiguousBlockAssociation:
   Enabled: false
 
 Bundler/OrderedGems:
+  Enabled: false
+
+Gemspec/RequiredRubyVersion:
   Enabled: false
