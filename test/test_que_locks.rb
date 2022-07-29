@@ -27,6 +27,22 @@ class TestReenqueueJob < Que::Job
   end
 end
 
+class TestUntouchedActiveJob < ActiveJob::Base
+  def perform(user_id, **kwargs)
+    args = kwargs.empty? ? user_id : [user_id] << kwargs
+    $executions << args
+  end
+end
+
+class TestActiveJob < ActiveJob::Base
+  self.exclusive_execution_lock = true
+
+  def perform(user_id, **kwargs)
+    args = kwargs.empty? ? user_id : [user_id] << kwargs
+    $executions << args
+  end
+end
+
 class TestQueLocks < Minitest::Test
   def setup
     $executions = []
@@ -247,5 +263,83 @@ class TestQueLocks < Minitest::Test
   def test_job_options_overrides_kwarg
     job = TestJob.enqueue(1, queue: :foo, job_options: { queue: :bar })
     assert_equal :bar, job.que_attrs[:queue].to_sym
+  end
+
+  def test_can_enqueue_untouched_active_job
+    Que::Locks::ExecutionLock.expects(:already_enqueued_job_wanting_lock?).never
+
+    with_synchronous_execution do
+      TestUntouchedActiveJob.perform_later 1, unrelated: :qux
+    end
+    assert_equal [[1, { unrelated: :qux }]], $executions
+  end
+
+  def test_multiple_enqueued_untouched_active_jobs
+    TestUntouchedActiveJob.perform_later 1
+    TestUntouchedActiveJob.perform_later 1
+    run_jobs
+
+    assert_equal [1, 1], $executions
+  end
+
+  def test_can_enqueue_locked_active_job
+    assert_args = lambda do |klass, args|
+      assert_equal Que::Locks::ActiveJobExtensions::ExclusiveJobWrapper, klass
+      assert_equal 1, args.length
+      assert_equal "TestActiveJob", args.first["job_class"]
+      assert_equal [1, { "unrelated" => { "_aj_serialized" => "ActiveJob::Serializers::SymbolSerializer", "value" => "qux" }, "_aj_symbol_keys" => ["unrelated"] }], args.first["arguments"]
+    end
+
+    mock_lock = mock("lock")
+    Que::Locks::ExecutionLock.expects(:already_enqueued_job_wanting_lock?).with(&assert_args).returns(false)
+    Que::Locks::ExecutionLock.expects(:lock_key).with(&assert_args).returns(mock_lock)
+    Que::Locks::ExecutionLock.expects(:acquire!).with(mock_lock).returns(true)
+    Que::Locks::ExecutionLock.expects(:release!).with(mock_lock)
+
+    TestActiveJob.perform_later 1, unrelated: :qux
+    run_jobs
+    assert_equal [[1, { unrelated: :qux }]], $executions
+  end
+
+  def test_can_enqueue_locked_active_job_skipped_if_lock_taken
+    assert_args = lambda do |klass, args|
+      assert_equal Que::Locks::ActiveJobExtensions::ExclusiveJobWrapper, klass
+      assert_equal 1, args.length
+      assert_equal "TestActiveJob", args.first["job_class"]
+      assert_equal [1], args.first["arguments"]
+    end
+
+    mock_lock = mock("lock")
+    Que::Locks::ExecutionLock.expects(:already_enqueued_job_wanting_lock?).with(&assert_args).returns(false)
+    Que::Locks::ExecutionLock.expects(:lock_key).with(&assert_args).returns(mock_lock)
+    Que::Locks::ExecutionLock.expects(:acquire!).with(mock_lock).returns(false)
+
+    TestActiveJob.perform_later 1
+    run_jobs
+    assert_empty $executions
+  end
+
+  def test_multiple_enqueued_locked_active_jobs
+    TestActiveJob.perform_later 1
+    TestActiveJob.perform_later 1
+    run_jobs
+
+    assert_equal [1], $executions # one should be deduped
+  end
+
+  def test_multiple_unique_enqueued_locked_active_jobs
+    TestActiveJob.perform_later 1
+    TestActiveJob.perform_later 2
+    run_jobs
+
+    assert_equal [1, 2], $executions
+  end
+
+  def test_multiple_unique_enqueued_locked_active_jobs_with_kwargs
+    TestActiveJob.perform_later 1
+    TestActiveJob.perform_later 1, unrelated: :qux
+    run_jobs
+
+    assert_equal [1, [1, { unrelated: :qux }]], $executions
   end
 end

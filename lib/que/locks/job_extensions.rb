@@ -6,7 +6,7 @@ module Que::Locks
       args << kwargs if kwargs.any?
       return true unless self.exclusive_execution_lock
       return false if Que::Locks::ExecutionLock.already_enqueued_job_wanting_lock?(self, args)
-      return Que::Locks::ExecutionLock.can_aquire?(self, args)
+      return Que::Locks::ExecutionLock.can_acquire?(self, args)
     end
 
     def enqueue(*args, queue: nil, priority: nil, run_at: nil, job_class: nil, tags: nil, job_options: {}, **kwargs)
@@ -25,12 +25,16 @@ module Que::Locks
 
         if Que::Locks::ExecutionLock.already_enqueued_job_wanting_lock?(self, args_list)
           Que.log(level: :info, event: :skipped_enqueue_due_to_preemptive_lock_check, args: args_list)
-        else
-          super(*args, **forwardable_kwargs)
+          # This technically breaks API compatibility with que, which always
+          # returns a job. It could be argued that we should return the
+          # already-enqueued job, but then we'd lose the ability to signal to
+          # the caller that a job wasn't actually enqueued. Let's see how
+          # far we can get with this.
+          return
         end
-      else
-        super(*args, **forwardable_kwargs)
       end
+
+      super(*args, **forwardable_kwargs)
     end
   end
 end

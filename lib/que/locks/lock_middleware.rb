@@ -3,7 +3,7 @@ module Que::Locks
     if job.class.exclusive_execution_lock
       args = job.que_attrs[:args]
       lock_key = ExecutionLock.lock_key(job.class, args)
-      if ExecutionLock.aquire!(lock_key)
+      if ExecutionLock.acquire!(lock_key)
         begin
           block.call
         ensure
