@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    que-locks (0.3.0)
+    que-locks (0.4.0)
       neatjson (~> 0.9)
       que (~> 1.0)
       xxhash (~> 0.4)
