@@ -8,6 +8,7 @@ gemspec
 group :development do
   gem "activerecord"
   gem "activejob"
+  gem "railties"
   gem "pg"
   gem "database_cleaner"
 
