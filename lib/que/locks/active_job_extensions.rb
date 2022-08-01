@@ -17,7 +17,13 @@ module Que::Locks
 
     def do_enqueue(job, **job_options)
       job_options[:priority] = job.priority if job.respond_to? :priority
-      job_options[:queue] = job.queue_name if job.respond_to? :queue_name
+
+      # Forward the queue name as long as the job supports it, unless it's Rails 4
+      # where queue names were used for priorities (see
+      # https://github.com/rails/rails/pull/19498)
+      if job.respond_to?(:queue_name) && ::ActiveJob.version.segments.first > 4
+        job_options[:queue] = job.queue_name
+      end
 
       que_job = ExclusiveJobWrapper.enqueue job.serialize, job_options: job_options
       if que_job && job.respond_to?(:provider_job_id=)
