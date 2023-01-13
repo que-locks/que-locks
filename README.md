@@ -40,7 +40,17 @@ class SomeJob < Que::Job
 end
 ```
 
-That's it!
+If you're using Rails, the `ActiveJob` API is enhanced the same way: set the `exclusive_execution_lock` property on your `ActiveJob::Base` subclass:
+
+```ruby
+class SomeJob < ActiveJob::Base
+  self.exclusive_execution_lock = true
+
+  def perform(user_id:, bar:)
+    # useful stuff
+  end
+end
+```
 
 ## Configuration (Important!)
 
@@ -98,7 +108,6 @@ It can be tricky to puzzle out if you have a job locking or a job concurrency li
 - Configurable preemptive lock checking at enqueue time
 - Selective argument comparison for lock key computation
 - maybe a `que-web` integration to expose lock info
-- ActiveJob integration for Rails users. It'd be nice for those who prefer the ActiveJob::Job API to use `que-locks` for nice transactional locking semantics, but this doesn't exist yet. In the meantime, we suggest using `Que::Job` directly.
 
 If you wish for any of this stuff, feel free to open a PR, contributions are always welcome!!
 
