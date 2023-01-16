@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email = ["harry.brundage@gmail.com"]
 
   spec.summary = %q{Job locking for que jobs such that only one can be in the queue or executing at once.}
-  spec.homepage = "https://github.com/superpro-inc/que-locks"
+  spec.homepage = "https://github.com/que-locks/que-locks"
   spec.license = "MIT"
 
   # Specify which files should be added to the gem when it is released.
