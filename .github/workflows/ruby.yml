@@ -75,6 +75,10 @@ jobs:
     needs: [test, lint]
     environment: rubygems
 
+    # Allow GITHUB_TOKEN write access to the repo
+    permissions:
+      contents: write
+
     # Only deploy if running on master
     if: github.ref == 'refs/heads/master'
 
