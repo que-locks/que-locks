@@ -29,7 +29,7 @@ jobs:
       PGUSER: postgres
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -51,7 +51,7 @@ jobs:
       PGUSER: postgres
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - name: Set up Ruby 2.7
         uses: ruby/setup-ruby@v1
         with:
@@ -69,3 +69,29 @@ jobs:
       - name: Check code formatting with rufo
         run: |
           bundle exec rufo --check lib test
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [test, lint]
+    environment: rubygems
+
+    # Only deploy if running on master
+    if: github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install semantic release
+        run: npm install semantic-release semantic-release-rubygem
+
+      - name: Run semantic release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEM_HOST_API_KEY: ${{ secrets.GEM_HOST_API_KEY }}
+        run: npx semantic-release
