@@ -283,10 +283,10 @@ class TestQueLocks < Minitest::Test
   end
 
   def test_can_enqueue_locked_active_job
-    key = '_aj_symbol_keys'
+    key = "_aj_symbol_keys"
 
-    if Gem::Version.new(Que::VERSION) >= Gem::Version.new('2.0')
-      key = '_aj_ruby2_keywords'
+    if Gem::Version.new(Que::VERSION) >= Gem::Version.new("2.0")
+      key = "_aj_ruby2_keywords"
     end
 
     assert_args = lambda do |klass, args|

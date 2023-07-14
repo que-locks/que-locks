@@ -28,11 +28,11 @@ module Que::Locks
       end
 
       que_job = if require_job_options_kwarg?
-        ExclusiveJobWrapper.enqueue job.serialize, job_options: job_options
-      else
-        ExclusiveJobWrapper.enqueue job.serialize, **job_options
-      end
-      
+          ExclusiveJobWrapper.enqueue job.serialize, job_options: job_options
+        else
+          ExclusiveJobWrapper.enqueue job.serialize, **job_options
+        end
+
       if que_job && job.respond_to?(:provider_job_id=)
         job.provider_job_id = que_job.attrs["job_id"]
       end
