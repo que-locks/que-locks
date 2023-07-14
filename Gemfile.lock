@@ -3,7 +3,7 @@ PATH
   specs:
     que-locks (0.4.1)
       neatjson (~> 0.9)
-      que (~> 1.0)
+      que (~> 2.2)
       xxhash (~> 0.4)
 
 GEM
@@ -68,7 +68,7 @@ GEM
     parser (3.1.2.0)
       ast (~> 2.4.1)
     pg (1.4.2)
-    que (1.4.1)
+    que (2.2.1)
     racc (1.6.0)
     rack (2.2.4)
     rack-test (2.0.2)
@@ -85,7 +85,7 @@ GEM
       rake (>= 0.13)
       thor (~> 1.0)
     rainbow (3.1.1)
-    rake (10.5.0)
+    rake (13.0.6)
     regexp_parser (2.5.0)
     rexml (3.2.5)
     rubocop (1.32.0)
@@ -126,7 +126,7 @@ DEPENDENCIES
   pg
   que-locks!
   railties
-  rake (~> 10.0)
+  rake (~> 13.0)
   rubocop
   rubocop-performance
   rufo
