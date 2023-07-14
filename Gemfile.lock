@@ -3,7 +3,7 @@ PATH
   specs:
     que-locks (0.4.1)
       neatjson (~> 0.9)
-      que (~> 2.2)
+      que (>= 1.0, < 2.3)
       xxhash (~> 0.4)
 
 GEM

@@ -39,7 +39,7 @@ class Minitest::Test
     Que.run_synchronously = old
   end
 
-  def sleep_until(*args, &block)
+  ruby2_keywords def sleep_until(*args, &block)
     sleep_until?(*args, &block) || raise("sleep_until timeout reached")
   end
 
@@ -65,6 +65,7 @@ class Minitest::Test
     jobs = ActiveRecord::Base.connection.execute("SELECT * FROM que_jobs;").to_a.map do |job|
       job.symbolize_keys!
       job[:args] = JSON.parse(job[:args])
+      job[:kwargs] = JSON.parse(job[:kwargs])
       job
     end
 
