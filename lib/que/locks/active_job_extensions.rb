@@ -23,13 +23,27 @@ module Que::Locks
       # https://github.com/rails/rails/pull/19498)
       if job.respond_to?(:queue_name) && ::ActiveJob.version.segments.first > 4
         job_options[:queue] = job.queue_name
+      else
+        job_options[:queue] = "default"
       end
 
-      que_job = ExclusiveJobWrapper.enqueue job.serialize, job_options: job_options
+      que_job = if require_job_options_kwarg?
+          ExclusiveJobWrapper.enqueue job.serialize, job_options: job_options
+        else
+          ExclusiveJobWrapper.enqueue job.serialize, **job_options
+        end
+
       if que_job && job.respond_to?(:provider_job_id=)
         job.provider_job_id = que_job.attrs["job_id"]
       end
       que_job
+    end
+
+    private
+
+    def require_job_options_kwarg?
+      @require_job_options_kwarg ||=
+        self.method(:enqueue).parameters.any? { |ptype, pname| ptype == :key && pname == :job_options }
     end
   end
 end

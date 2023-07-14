@@ -43,6 +43,8 @@ class Minitest::Test
     sleep_until?(*args, &block) || raise("sleep_until timeout reached")
   end
 
+  ruby2_keywords(:sleep_until) if respond_to?(:ruby2_keywords, true)
+
   def sleep_until?(timeout: SLEEP_UNTIL_TIMEOUT)
     deadline = Time.now + timeout
     loop do
@@ -65,6 +67,7 @@ class Minitest::Test
     jobs = ActiveRecord::Base.connection.execute("SELECT * FROM que_jobs;").to_a.map do |job|
       job.symbolize_keys!
       job[:args] = JSON.parse(job[:args])
+      job[:kwargs] = JSON.parse(job[:kwargs]) if job[:kwargs]
       job
     end
 
