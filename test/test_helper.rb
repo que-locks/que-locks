@@ -39,9 +39,11 @@ class Minitest::Test
     Que.run_synchronously = old
   end
 
-  ruby2_keywords def sleep_until(*args, &block)
+  def sleep_until(*args, &block)
     sleep_until?(*args, &block) || raise("sleep_until timeout reached")
   end
+
+  ruby2_keywords(:sleep_until) if respond_to?(:ruby2_keywords, true)
 
   def sleep_until?(timeout: SLEEP_UNTIL_TIMEOUT)
     deadline = Time.now + timeout
